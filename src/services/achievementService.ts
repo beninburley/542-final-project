@@ -30,7 +30,7 @@ export async function getAchievementPercentages(
   return result.data.achievementpercentages.achievements.map((item) => ({
     name: item.name,
     displayName: item.name, // raw internal name — display name requires API key
-    percent: item.percent,
+    percent: Number(item.percent), // Steam API sometimes returns a string
     hidden: false, // not available from this public endpoint
   }));
 }

@@ -13,7 +13,8 @@ export function formatDate(isoString: string): string {
 
 /** Format a percentage number to one decimal place. */
 export function formatPercent(value: number): string {
-  return `${value.toFixed(1)}%`;
+  const n = Number(value);
+  return isNaN(n) ? '—' : `${n.toFixed(1)}%`;
 }
 
 /** Build the Steam store page URL for a given App ID. */
