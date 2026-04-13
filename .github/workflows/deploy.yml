@@ -40,6 +40,8 @@ jobs:
         run: npm run build
         env:
           VITE_STEAM_API_KEY: ${{ secrets.VITE_STEAM_API_KEY }}
+          VITE_USE_CORS_PROXY: "true"
+          VITE_CORS_PROXY_URL: "https://corsproxy.io/?"
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
