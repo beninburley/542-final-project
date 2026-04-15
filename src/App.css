@@ -57,6 +57,47 @@
   color: #1a56db;
 }
 
+/* ── Mobile menu toggle ─────────────────────────────────────────────────── */
+.app-nav__menu-btn {
+  display: none;           /* hidden on desktop; shown in mobile breakpoint */
+  margin-left: auto;
+  padding: 0.5rem;
+  background: none;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  color: inherit;
+  line-height: 0;
+}
+
+.app-nav__menu-btn:hover {
+  background: #f0f0f0;
+}
+
+/* Three-line hamburger icon drawn with pseudo-elements */
+.app-nav__hamburger {
+  display: block;
+  width: 22px;
+  height: 2px;
+  background: currentColor;
+  border-radius: 1px;
+  position: relative;
+}
+
+.app-nav__hamburger::before,
+.app-nav__hamburger::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background: currentColor;
+  border-radius: 1px;
+}
+
+.app-nav__hamburger::before { top: -7px; }
+.app-nav__hamburger::after  { top:  7px; }
+
 /* ── Buttons ─────────────────────────────────────────────────────────────── */
 .btn {
   display: inline-flex;
@@ -629,7 +670,86 @@
 }
 
 /* ── Responsive ──────────────────────────────────────────────────────────── */
-@media (max-width: 600px) {
+
+/* ── Tablets and wide phones in landscape (≤768px) ── */
+@media (max-width: 768px) {
+  .home-hero h1 {
+    font-size: 1.75rem;
+  }
+
+  .feature-list {
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  }
+
+  .game-header__image {
+    max-width: 220px;
+  }
+}
+
+/* ── Phones and narrow viewports (≤640px) ── */
+@media (max-width: 640px) {
+  /* Navigation: reveal hamburger button, collapse links into a drawer */
+  .app-nav {
+    padding: 0.5rem 0.75rem;
+  }
+
+  .app-nav__brand {
+    flex: 1;
+  }
+
+  .app-nav__menu-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .app-nav__links {
+    display: none;
+    flex-direction: column;
+    width: 100%;
+    gap: 0;
+    order: 3;                    /* pushes below brand + hamburger row */
+    border-top: 1px solid #eee;
+    margin-top: 0.25rem;
+    padding: 0.25rem 0;
+  }
+
+  .app-nav__links--open {
+    display: flex;
+  }
+
+  .app-nav__links li {
+    width: 100%;
+  }
+
+  /* Full-width, taller tap targets for nav links on touch screens */
+  .app-nav__links a,
+  .app-nav__links .btn--inline {
+    display: block;
+    padding: 0.75rem 0.5rem;
+    width: 100%;
+    text-align: left;
+    font-size: 1rem;
+    border-radius: 0;
+  }
+
+  /* Tighter content padding on small screens */
+  .app-main {
+    padding: 0.75rem;
+  }
+
+  /* Minimum 44 px touch targets for all interactive controls */
+  .btn {
+    min-height: 44px;
+  }
+
+  .search-bar__input,
+  .form-field input {
+    min-height: 44px;
+    min-width: 0;                /* allow flex to shrink below 200px default */
+  }
+
+  /* Game header stacks image above body text */
   .game-header {
     flex-direction: column;
   }
@@ -638,11 +758,56 @@
     max-width: 100%;
   }
 
+  /* Profile card: avatar above info */
   .profile-card {
     flex-direction: column;
   }
 
+  /* Achievement list: hide bar column to reclaim width */
   .achievement-row__bar-wrap {
     display: none;
+  }
+
+  /* Home page hero */
+  .home-hero {
+    padding: 1.25rem 0 1rem;
+  }
+
+  .home-hero h1 {
+    font-size: 1.5rem;
+  }
+
+  .home-hero__tagline {
+    font-size: 1rem;
+  }
+}
+
+/* ── Very narrow phones (≤400px) ── */
+@media (max-width: 400px) {
+  .home-hero h1 {
+    font-size: 1.3rem;
+  }
+
+  .game-header__title {
+    font-size: 1.1rem;
+  }
+
+  /* Single-column feature cards on the smallest screens */
+  .feature-list {
+    grid-template-columns: 1fr;
+  }
+
+  .login-form {
+    padding: 1rem 0.75rem;
+  }
+
+  /* Sort controls stack vertically instead of overflowing */
+  .sort-controls {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .sort-controls__count {
+    margin-left: 0;
   }
 }
