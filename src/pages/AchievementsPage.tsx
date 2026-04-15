@@ -6,6 +6,7 @@ import GameSearchBar from "../components/GameSearchBar";
 import GamePickerList from "../components/GamePickerList";
 import GameHeader from "../components/GameHeader";
 import AchievementRow from "../components/AchievementRow";
+import AchievementsChart from "../components/AchievementsChart";
 import StatusView from "../components/StatusView";
 
 type SortBy = "name" | "percent";
@@ -141,6 +142,8 @@ export default function AchievementsPage() {
           {achState.status === "success" &&
             achState.data.results.length > 0 && (
               <>
+                <AchievementsChart achievements={achState.data.results} />
+
                 <div className="sort-controls">
                   <span>Sort by:</span>
                   <button
