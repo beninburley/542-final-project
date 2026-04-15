@@ -20,7 +20,7 @@ export async function searchGames(term: string): Promise<Game[]> {
   }
 
   return result.data.items
-    .filter((item) => item.type === "game")
+    .filter((item) => item.type === "app" && !item.streamingvideo)
     .map((item) => ({
       appId: item.id,
       title: item.name,

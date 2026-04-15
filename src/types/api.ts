@@ -11,6 +11,7 @@ export type SteamStoreSearchResponse = {
     name: string;
     tiny_image: string;
     metascore?: string;
+    streamingvideo?: boolean; // true for video/soundtrack items; used to exclude non-games
   }>;
 };
 
