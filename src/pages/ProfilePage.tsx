@@ -35,7 +35,8 @@ export default function ProfilePage() {
 
       {session.status === "authenticated" && (
         <p className="page__subtitle">
-          Signed in as <strong>{session.username}</strong>.
+          Signed in as <strong>{session.username}</strong>. Try
+          76561198348127708 as a lookup ID
         </p>
       )}
 
@@ -46,7 +47,7 @@ export default function ProfilePage() {
               type="text"
               value={steamId}
               onChange={(e) => setSteamId(e.target.value)}
-              placeholder="Enter 64-bit Steam ID (e.g. 76561197960435530)"
+              placeholder="Enter 64-bit Steam ID (e.g. 76561198348127708)"
               disabled={profileState.status === "loading"}
               className="search-bar__input"
               autoComplete="off"
