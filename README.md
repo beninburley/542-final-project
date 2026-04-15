@@ -53,7 +53,7 @@ Password:  is542demo
 
 Every API response travels through three layers before the UI sees it:
 
-1. **Fetch** — `steamFetch(url)` in `src/services/steamClient.ts` returns `{ ok: true, data: unknown } | { ok: false, error: string }`. The data is typed as `unknown` — no assumptions about shape.
+1. **Fetch** — `steamFetch(url)` in `src/services/steamClient.ts` returns `{ ok: true, data: unknown } | { ok: false, error: string }`. The data is typed as `unknown` and requires narrowing.
 
 2. **Parse & validate** — `src/services/dto.ts` contains one parser per endpoint (e.g. `parseNewsResponse`, `parseAchievementPercentages`). Each parser accepts `unknown`, checks that required fields exist with the correct types at runtime, and returns a `ParseResult<T>`. Array fields filter out malformed items rather than failing the whole response.
 
