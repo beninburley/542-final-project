@@ -1,36 +1,70 @@
 import type { Achievement } from "../types";
-import type { SteamAchievementPercentagesResponse } from "../types/api";
-import { STEAM_API_BASE } from "../config/env";
+import type {
+  SteamAchievementPercentagesResponse,
+  SteamSchemaResponse,
+} from "../types/api";
+import { STEAM_API_BASE, ENV } from "../config/env";
 import { steamFetch } from "./steamClient";
 
 /**
- * Fetch global achievement completion percentages for a game.
- * Endpoint: ISteamUserStats/GetGlobalAchievementPercentagesForApp/v0002
- *           (public, no API key required).
+ * Fetch global achievement completion percentages for a game, enriched with
+ * human-readable display names when a Steam API key is available.
  *
- * NOTE: This endpoint only returns internal achievement names and percentages.
- * Human-readable display names require GetSchemaForGame, which needs an API key.
- * Until a key is configured, displayName will equal the raw internal name.
+ * Always calls (public, no key required):
+ *   ISteamUserStats/GetGlobalAchievementPercentagesForApp/v0002
+ *   → returns internal achievement names + global completion percentages
  *
- * Throws on network or API error.
+ * Also calls when VITE_STEAM_API_KEY is set (no login required):
+ *   ISteamUserStats/GetSchemaForGame/v2
+ *   → enriches results with displayName, description, hidden flag, and icon URLs
+ *
+ * If no key is configured the display name falls back to the raw internal name.
+ * Throws on network or API error from the primary percentages endpoint.
  */
 export async function getAchievementPercentages(
   appId: number,
 ): Promise<Achievement[]> {
-  const url =
+  const percentUrl =
     `${STEAM_API_BASE}/ISteamUserStats/GetGlobalAchievementPercentagesForApp/v0002/` +
     `?gameid=${appId}&format=json`;
 
-  const result = await steamFetch<SteamAchievementPercentagesResponse>(url);
+  // Run both requests in parallel when a key is available; schema fetch is
+  // best-effort — a failure there will not block the percentages from showing.
+  const schemaPromise: Promise<SteamSchemaResponse | null> = ENV.steamApiKey
+    ? steamFetch<SteamSchemaResponse>(
+        `${STEAM_API_BASE}/ISteamUserStats/GetSchemaForGame/v2/` +
+          `?appid=${appId}&key=${ENV.steamApiKey}&l=english&format=json`,
+      ).then((r) => (r.ok ? r.data : null))
+    : Promise.resolve(null);
 
-  if (!result.ok) {
-    throw new Error(`Achievements request failed: ${result.error}`);
+  const [percentResult, schemaData] = await Promise.all([
+    steamFetch<SteamAchievementPercentagesResponse>(percentUrl),
+    schemaPromise,
+  ]);
+
+  if (!percentResult.ok) {
+    throw new Error(`Achievements request failed: ${percentResult.error}`);
   }
 
-  return result.data.achievementpercentages.achievements.map((item) => ({
-    name: item.name,
-    displayName: item.name, // raw internal name — display name requires API key
-    percent: Number(item.percent), // Steam API sometimes returns a string
-    hidden: false, // not available from this public endpoint
-  }));
+  // Build a lookup map from internal name → schema metadata for O(1) merging.
+  type SchemaEntry = NonNullable<
+    NonNullable<SteamSchemaResponse["game"]["availableGameStats"]>["achievements"]
+  >[number];
+  const schemaMap = new Map<string, SchemaEntry>();
+  schemaData?.game.availableGameStats?.achievements?.forEach((a) =>
+    schemaMap.set(a.name, a),
+  );
+
+  return percentResult.data.achievementpercentages.achievements.map((item) => {
+    const schema = schemaMap.get(item.name);
+    return {
+      name: item.name,
+      displayName: schema?.displayName ?? item.name, // friendly name, falls back to internal name
+      description: schema?.description,
+      iconUrl: schema?.icon,
+      iconGrayUrl: schema?.icongray,
+      percent: Number(item.percent), // Steam API sometimes returns a string
+      hidden: schema ? schema.hidden === 1 : false,
+    };
+  });
 }

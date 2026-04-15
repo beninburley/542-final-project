@@ -162,12 +162,6 @@ export default function AchievementsPage() {
                   </span>
                 </div>
 
-                <p className="ach-note">
-                  Note: achievement display names require an API key. Names
-                  shown below are the raw internal identifiers until a key is
-                  configured.
-                </p>
-
                 <ul className="achievement-list">
                   {sortAchievements(achState.data, sortBy).map((ach) => (
                     <AchievementRow key={ach.name} achievement={ach} />

@@ -58,6 +58,28 @@ export type SteamAchievementPercentagesResponse = {
   };
 };
 
+/**
+ * Response from ISteamUserStats/GetSchemaForGame/v2 (requires API key).
+ * Provides human-readable display names, descriptions, hidden flag, and icon URLs.
+ */
+export type SteamSchemaResponse = {
+  game: {
+    gameName: string;
+    gameVersion: string;
+    availableGameStats?: {
+      achievements?: Array<{
+        name: string;         // internal API name — matches percentages endpoint
+        defaultvalue: number;
+        displayName: string;
+        hidden: number;       // 0 = visible, 1 = hidden until earned
+        description?: string;
+        icon?: string;        // URL of earned-state icon
+        icongray?: string;    // URL of un-earned (gray) icon
+      }>;
+    };
+  };
+};
+
 export type SteamPlayerSummariesResponse = {
   response: {
     players: Array<{
