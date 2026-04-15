@@ -20,7 +20,11 @@ export default function Navigation() {
 
   return (
     <nav className="app-nav" aria-label="Main navigation">
-      <span className="app-nav__brand">SteamLens</span>
+      <span className="app-nav__brand">
+        <NavLink to="/" end onClick={close}>
+          SteamLens
+        </NavLink>
+      </span>
 
       {/* Hamburger button — only visible via CSS at ≤640px */}
       <button
@@ -39,21 +43,30 @@ export default function Navigation() {
           </NavLink>
         </li>
         <li>
-          <NavLink to="/news" onClick={close}>News</NavLink>
+          <NavLink to="/news" onClick={close}>
+            News
+          </NavLink>
         </li>
         <li>
-          <NavLink to="/achievements" onClick={close}>Achievements</NavLink>
+          <NavLink to="/achievements" onClick={close}>
+            Achievements
+          </NavLink>
         </li>
 
         {session.status === "authenticated" ? (
           <>
             <li>
-              <NavLink to="/profile" onClick={close}>Profile</NavLink>
+              <NavLink to="/profile" onClick={close}>
+                Profile
+              </NavLink>
             </li>
             <li>
               <button
                 className="btn btn--inline"
-                onClick={() => { logout(); close(); }}
+                onClick={() => {
+                  logout();
+                  close();
+                }}
               >
                 Sign out ({session.username})
               </button>
@@ -61,7 +74,9 @@ export default function Navigation() {
           </>
         ) : (
           <li>
-            <NavLink to="/login" onClick={close}>Login</NavLink>
+            <NavLink to="/login" onClick={close}>
+              Login
+            </NavLink>
           </li>
         )}
       </ul>
