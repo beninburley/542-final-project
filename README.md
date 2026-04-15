@@ -29,13 +29,13 @@ Open `http://localhost:5173` in your browser.
 
 ---
 
-## What Works Right Now (No API Key Required)
+## What Pages Exist
 
-- **Home page** — Landing page with feature overview and navigation
-- **News page** — Search any Steam game by title or App ID, then fetch recent news
-- **Achievements page** — Fetch global achievement completion percentages for any game
-- **Login** — Sign in with the hardcoded credentials (see below)
-- **Routing** — Hash-based navigation between all pages (`/#/`, `/#/news`, etc.)
+- **Home page** - Landing page with feature overview and navigation
+- **News page** - Search any Steam game by title or App ID, then fetch recent news
+- **Achievements page** - Fetch global achievement completion percentages for any game
+- **Profile page** - Search for user Profiles (requires login)
+- **Login** - Sign in with the hardcoded credentials (see below)
 
 ### Hardcoded Login Credentials
 
@@ -52,23 +52,72 @@ These are defined in `src/config/constants.ts` and carry no real security requir
 
 **Player Profile lookup** (`/#/profile`) — requires a Steam Web API key.
 
-### Setup Steps
+---
 
-1. Get a free key at <https://steamcommunity.com/dev/apikey>
+## APIs Used
 
-2. Copy `.env.example` to `.env` in the project root.
+### Steam Web API — `api.steampowered.com`
 
-3. Fill in your key:
+| Endpoint                                                      | Auth required | Used for                                                              |
+| ------------------------------------------------------------- | ------------- | --------------------------------------------------------------------- |
+| `ISteamNews/GetNewsForApp/v0002`                              | No            | Fetches recent news articles for a given game App ID                  |
+| `ISteamUserStats/GetGlobalAchievementPercentagesForApp/v0002` | No            | Returns every achievement's global unlock percentage                  |
+| `ISteamUserStats/GetSchemaForGame/v2`                         | API key       | Enriches achievements with display names, descriptions, and icon URLs |
+| `ISteamUser/GetPlayerSummaries/v0002`                         | API key       | Looks up a Steam profile by 64-bit Steam ID                           |
 
-   ```
-   VITE_STEAM_API_KEY=your_key_here
-   ```
+### Steam Store API — `store.steampowered.com`
 
-4. Restart the dev server (`npm run dev`).
+| Endpoint          | Auth required | Used for                                                  |
+| ----------------- | ------------- | --------------------------------------------------------- |
+| `api/storesearch` | No            | Full-text game title search (returns App ID, title, icon) |
+| `api/appdetails`  | No            | Fetches header image and description for a known App ID   |
 
-> **Security note:** Because this is a frontend-only project the API key ends up in the
-> built JavaScript and is visible in browser network requests. This is a known limitation.
-> **Never commit your `.env` file to version control.**
+### How API Responses Are Handled
+
+All API data flows through three distinct layers before the UI ever touches it:
+
+**1. Fetch (`src/services/steamClient.ts`)**
+
+`steamFetch(url)` makes the HTTP request and returns a discriminated union:
+
+```ts
+{ ok: true;  data: unknown } |
+{ ok: false; error: string }
+```
+
+`data` is typed as `unknown` — not cast to any assumed shape. This is intentional. The app makes no assumptions about what the API actually returned.
+
+**2. Parse & validate (`src/services/dto.ts`)**
+
+Each API endpoint has a dedicated parser function that accepts `unknown` and narrows it to a fully-typed response shape using runtime checks:
+
+| Parser                        | Endpoint                                      |
+| ----------------------------- | --------------------------------------------- |
+| `parseStoreSearch`            | `api/storesearch`                             |
+| `parseAppDetails`             | `api/appdetails`                              |
+| `parseNewsResponse`           | `GetNewsForApp/v0002`                         |
+| `parseAchievementPercentages` | `GetGlobalAchievementPercentagesForApp/v0002` |
+| `parseSchemaResponse`         | `GetSchemaForGame/v2`                         |
+| `parsePlayerSummaries`        | `GetPlayerSummaries/v0002`                    |
+
+Every parser verifies required fields exist with the expected types before constructing the typed object. Array responses filter out malformed elements rather than failing the whole parse, so one bad item doesn't break the page. Parsers return their own `ParseResult<T>`:
+
+```ts
+{ ok: true;  data: T      } |
+{ ok: false; error: string }
+```
+
+**3. Map to domain types (`src/services/*.ts`)**
+
+Service functions (`searchGames`, `getGameNews`, `getAchievementPercentages`, etc.) receive the validated, typed response from the parser and map it to clean domain types (`Game`, `GameNewsItem`, `Achievement`, `SteamProfile`). These domain types — defined in `src/types/steam.ts` — are what pages, hooks, and components use. They are never coupled to raw API shapes.
+
+**4. State management (`src/hooks/`)**
+
+Custom hooks (`useNews`, `useAchievements`, `useProfile`, `useGameSearch`) call the service functions and track the result using the `RemoteData` lifecycle: `idle → loading → success | error`.
+
+**5. CORS**
+
+In development, Vite proxies `/steam-api/` and `/steam-store/` requests. In production (GitHub Pages), all requests are routed through `corsproxy.io` via the `VITE_USE_CORS_PROXY` build flag baked in by the GitHub Actions workflow.
 
 ---
 
@@ -184,13 +233,13 @@ The Achievements page displays a bar chart above the achievement list, powered b
 [recharts](https://recharts.org/) third-party library. Charts show how the game's
 achievements are distributed across five difficulty tiers:
 
-| Tier | Completion rate | Bar color |
-| --------- | --------------- | --------- |
-| Common    | ≥ 60%           | Green     |
+| Tier      | Completion rate | Bar color   |
+| --------- | --------------- | ----------- |
+| Common    | ≥ 60%           | Green       |
 | Moderate  | 40–60%          | Light green |
-| Uncommon  | 20–40%          | Orange    |
-| Rare      | 10–20%          | Red       |
-| Very Rare | < 10%           | Purple    |
+| Uncommon  | 20–40%          | Orange      |
+| Rare      | 10–20%          | Red         |
+| Very Rare | < 10%           | Purple      |
 
 A custom tooltip displays the exact count on bar hover. The chart uses
 `ResponsiveContainer` so it scales correctly on all screen widths.
