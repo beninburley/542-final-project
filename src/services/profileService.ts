@@ -1,8 +1,8 @@
 import type { SteamProfile } from "../types";
-import type { SteamPlayerSummariesResponse } from "../types/api";
 import { STEAM_API_BASE } from "../config/env";
 import { ENV } from "../config/env";
 import { steamFetch } from "./steamClient";
+import { parsePlayerSummaries } from "./dto";
 
 /**
  * Marker prefix used to identify "API key missing" errors in the UI.
@@ -34,13 +34,18 @@ export async function getPlayerSummary(steamId: string): Promise<SteamProfile> {
     `${STEAM_API_BASE}/ISteamUser/GetPlayerSummaries/v0002/` +
     `?key=${ENV.steamApiKey}&steamids=${encodeURIComponent(steamId)}&format=json`;
 
-  const result = await steamFetch<SteamPlayerSummariesResponse>(url);
+  const result = await steamFetch(url);
 
   if (!result.ok) {
     throw new Error(`Profile request failed: ${result.error}`);
   }
 
-  const players = result.data.response.players;
+  const parsed = parsePlayerSummaries(result.data);
+  if (!parsed.ok) {
+    throw new Error(`Profile response invalid: ${parsed.error}`);
+  }
+
+  const players = parsed.data.response.players;
   if (players.length === 0) {
     throw new Error(
       "No profile found for that Steam ID. " +

@@ -1,10 +1,8 @@
 import type { Achievement } from "../types";
-import type {
-  SteamAchievementPercentagesResponse,
-  SteamSchemaResponse,
-} from "../types/api";
+import type { SteamSchemaResponse } from "../types/api";
 import { STEAM_API_BASE, ENV } from "../config/env";
 import { steamFetch } from "./steamClient";
+import { parseAchievementPercentages, parseSchemaResponse } from "./dto";
 
 /**
  * Fetch global achievement completion percentages for a game, enriched with
@@ -31,14 +29,18 @@ export async function getAchievementPercentages(
   // Run both requests in parallel when a key is available; schema fetch is
   // best-effort — a failure there will not block the percentages from showing.
   const schemaPromise: Promise<SteamSchemaResponse | null> = ENV.steamApiKey
-    ? steamFetch<SteamSchemaResponse>(
+    ? steamFetch(
         `${STEAM_API_BASE}/ISteamUserStats/GetSchemaForGame/v2/` +
           `?appid=${appId}&key=${ENV.steamApiKey}&l=english&format=json`,
-      ).then((r) => (r.ok ? r.data : null))
+      ).then((r) => {
+        if (!r.ok) return null;
+        const parsed = parseSchemaResponse(r.data);
+        return parsed.ok ? parsed.data : null;
+      })
     : Promise.resolve(null);
 
   const [percentResult, schemaData] = await Promise.all([
-    steamFetch<SteamAchievementPercentagesResponse>(percentUrl),
+    steamFetch(percentUrl),
     schemaPromise,
   ]);
 
@@ -46,16 +48,23 @@ export async function getAchievementPercentages(
     throw new Error(`Achievements request failed: ${percentResult.error}`);
   }
 
+  const parsedPercents = parseAchievementPercentages(percentResult.data);
+  if (!parsedPercents.ok) {
+    throw new Error(`Achievements response invalid: ${parsedPercents.error}`);
+  }
+
   // Build a lookup map from internal name → schema metadata for O(1) merging.
   type SchemaEntry = NonNullable<
-    NonNullable<SteamSchemaResponse["game"]["availableGameStats"]>["achievements"]
+    NonNullable<
+      SteamSchemaResponse["game"]["availableGameStats"]
+    >["achievements"]
   >[number];
   const schemaMap = new Map<string, SchemaEntry>();
   schemaData?.game.availableGameStats?.achievements?.forEach((a) =>
     schemaMap.set(a.name, a),
   );
 
-  return percentResult.data.achievementpercentages.achievements.map((item) => {
+  return parsedPercents.data.achievementpercentages.achievements.map((item) => {
     const schema = schemaMap.get(item.name);
     return {
       name: item.name,

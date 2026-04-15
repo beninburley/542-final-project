@@ -1,8 +1,8 @@
 import type { GameNewsItem } from "../types";
-import type { SteamNewsResponse } from "../types/api";
 import { STEAM_API_BASE } from "../config/env";
 import { NEWS_COUNT } from "../config/constants";
 import { steamFetch } from "./steamClient";
+import { parseNewsResponse } from "./dto";
 
 /**
  * Fetch recent news for a Steam game by App ID.
@@ -14,13 +14,18 @@ export async function getGameNews(appId: number): Promise<GameNewsItem[]> {
     `${STEAM_API_BASE}/ISteamNews/GetNewsForApp/v0002/?appid=${appId}` +
     `&count=${NEWS_COUNT}&maxlength=500&format=json`;
 
-  const result = await steamFetch<SteamNewsResponse>(url);
+  const result = await steamFetch(url);
 
   if (!result.ok) {
     throw new Error(`News request failed: ${result.error}`);
   }
 
-  return result.data.appnews.newsitems.map((item) => ({
+  const parsed = parseNewsResponse(result.data);
+  if (!parsed.ok) {
+    throw new Error(`News response invalid: ${parsed.error}`);
+  }
+
+  return parsed.data.appnews.newsitems.map((item) => ({
     id: item.gid,
     appId: item.appid,
     title: item.title,

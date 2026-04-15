@@ -1,10 +1,7 @@
 import type { Game } from "../types";
-import type {
-  SteamStoreSearchResponse,
-  SteamAppDetailsResponse,
-} from "../types/api";
 import { STEAM_STORE_BASE } from "../config/env";
 import { steamFetch } from "./steamClient";
+import { parseStoreSearch, parseAppDetails } from "./dto";
 
 /**
  * Search Steam Store by title.
@@ -13,13 +10,18 @@ import { steamFetch } from "./steamClient";
  */
 export async function searchGames(term: string): Promise<Game[]> {
   const url = `${STEAM_STORE_BASE}/api/storesearch/?term=${encodeURIComponent(term)}&l=english&cc=US`;
-  const result = await steamFetch<SteamStoreSearchResponse>(url);
+  const result = await steamFetch(url);
 
   if (!result.ok) {
     throw new Error(`Game search failed: ${result.error}`);
   }
 
-  return result.data.items
+  const parsed = parseStoreSearch(result.data);
+  if (!parsed.ok) {
+    throw new Error(`Game search: ${parsed.error}`);
+  }
+
+  return parsed.data.items
     .filter((item) => item.type === "app" && !item.streamingvideo)
     .map((item) => ({
       appId: item.id,
@@ -35,14 +37,19 @@ export async function searchGames(term: string): Promise<Game[]> {
  */
 export async function getGameByAppId(appId: number): Promise<Game> {
   const url = `${STEAM_STORE_BASE}/api/appdetails/?appids=${appId}`;
-  const result = await steamFetch<SteamAppDetailsResponse>(url);
+  const result = await steamFetch(url);
 
   if (!result.ok) {
     // Non-fatal fallback — return minimal game info using the ID alone.
     return { appId, title: `App ${appId}` };
   }
 
-  const entry = result.data[String(appId)];
+  const parsed = parseAppDetails(result.data);
+  if (!parsed.ok) {
+    return { appId, title: `App ${appId}` };
+  }
+
+  const entry = parsed.data[String(appId)];
   if (!entry?.success || !entry.data) {
     return { appId, title: `App ${appId}` };
   }
