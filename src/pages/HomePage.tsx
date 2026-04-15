@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import { useAuth } from "../app/AuthContext";
 
 /**
  * Landing page — introduces the app and provides quick navigation to each
@@ -8,6 +9,9 @@ import { Link } from "react-router-dom";
  * is pre-loaded in the News and Achievements pages.
  */
 export default function HomePage() {
+  const { session } = useAuth();
+  const profileRoute =
+    session.status === "authenticated" ? "/profile" : "/login";
   return (
     <div className="page page--home">
       <section className="home-hero">
@@ -44,11 +48,12 @@ export default function HomePage() {
 
           <li className="feature-card">
             <h3>
-              <Link to="/login">Player Profile</Link>
+              <Link to={profileRoute}>Player Profile</Link>
             </h3>
             <p>
-              Log in to unlock Steam profile lookup. Look up any public Steam
-              account by its 64-bit Steam ID.
+              {session.status === "authenticated"
+                ? "Look up any public Steam account by its 64-bit Steam ID."
+                : "Log in to unlock Steam profile lookup. Look up any public Steam account by its 64-bit Steam ID."}
             </p>
           </li>
         </ul>
