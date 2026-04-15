@@ -192,6 +192,7 @@
 /* ── Pages ───────────────────────────────────────────────────────────────── */
 .page {
   padding-bottom: 2rem;
+  animation: fadeUp 0.3s ease-out both;
 }
 
 .page__subtitle {
