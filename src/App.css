@@ -83,7 +83,7 @@
 
 /* ── Mobile menu toggle ─────────────────────────────────────────────────── */
 .app-nav__menu-btn {
-  display: none;           /* hidden on desktop; shown in mobile breakpoint */
+  display: none; /* hidden on desktop; shown in mobile breakpoint */
   margin-left: auto;
   padding: 0.5rem;
   background: none;
@@ -119,8 +119,12 @@
   border-radius: 1px;
 }
 
-.app-nav__hamburger::before { top: -7px; }
-.app-nav__hamburger::after  { top:  7px; }
+.app-nav__hamburger::before {
+  top: -7px;
+}
+.app-nav__hamburger::after {
+  top: 7px;
+}
 
 /* ── Buttons ─────────────────────────────────────────────────────────────── */
 .btn {
@@ -202,6 +206,12 @@
 
 .search-section {
   margin-bottom: 1.5rem;
+}
+
+.search-suggestions {
+  margin: 0.5rem 0 0;
+  font-size: 0.875rem;
+  color: #888;
 }
 
 /* ── Status views ────────────────────────────────────────────────────────── */
@@ -400,16 +410,36 @@
 }
 
 /* Stagger each card so they cascade in one after another. */
-.news-card:nth-child(1)  { animation-delay: 0.00s; }
-.news-card:nth-child(2)  { animation-delay: 0.05s; }
-.news-card:nth-child(3)  { animation-delay: 0.10s; }
-.news-card:nth-child(4)  { animation-delay: 0.15s; }
-.news-card:nth-child(5)  { animation-delay: 0.20s; }
-.news-card:nth-child(6)  { animation-delay: 0.25s; }
-.news-card:nth-child(7)  { animation-delay: 0.30s; }
-.news-card:nth-child(8)  { animation-delay: 0.35s; }
-.news-card:nth-child(9)  { animation-delay: 0.40s; }
-.news-card:nth-child(10) { animation-delay: 0.45s; }
+.news-card:nth-child(1) {
+  animation-delay: 0s;
+}
+.news-card:nth-child(2) {
+  animation-delay: 0.05s;
+}
+.news-card:nth-child(3) {
+  animation-delay: 0.1s;
+}
+.news-card:nth-child(4) {
+  animation-delay: 0.15s;
+}
+.news-card:nth-child(5) {
+  animation-delay: 0.2s;
+}
+.news-card:nth-child(6) {
+  animation-delay: 0.25s;
+}
+.news-card:nth-child(7) {
+  animation-delay: 0.3s;
+}
+.news-card:nth-child(8) {
+  animation-delay: 0.35s;
+}
+.news-card:nth-child(9) {
+  animation-delay: 0.4s;
+}
+.news-card:nth-child(10) {
+  animation-delay: 0.45s;
+}
 
 .news-card__title {
   margin: 0 0 0.4rem;
@@ -537,26 +567,66 @@
 }
 
 /* Stagger the first 20 rows; beyond that they all share the max delay. */
-.achievement-row:nth-child(1)  { animation-delay: 0.00s; }
-.achievement-row:nth-child(2)  { animation-delay: 0.03s; }
-.achievement-row:nth-child(3)  { animation-delay: 0.06s; }
-.achievement-row:nth-child(4)  { animation-delay: 0.09s; }
-.achievement-row:nth-child(5)  { animation-delay: 0.12s; }
-.achievement-row:nth-child(6)  { animation-delay: 0.15s; }
-.achievement-row:nth-child(7)  { animation-delay: 0.18s; }
-.achievement-row:nth-child(8)  { animation-delay: 0.21s; }
-.achievement-row:nth-child(9)  { animation-delay: 0.24s; }
-.achievement-row:nth-child(10) { animation-delay: 0.27s; }
-.achievement-row:nth-child(11) { animation-delay: 0.30s; }
-.achievement-row:nth-child(12) { animation-delay: 0.33s; }
-.achievement-row:nth-child(13) { animation-delay: 0.36s; }
-.achievement-row:nth-child(14) { animation-delay: 0.39s; }
-.achievement-row:nth-child(15) { animation-delay: 0.42s; }
-.achievement-row:nth-child(16) { animation-delay: 0.45s; }
-.achievement-row:nth-child(17) { animation-delay: 0.48s; }
-.achievement-row:nth-child(18) { animation-delay: 0.51s; }
-.achievement-row:nth-child(19) { animation-delay: 0.54s; }
-.achievement-row:nth-child(20) { animation-delay: 0.57s; }
+.achievement-row:nth-child(1) {
+  animation-delay: 0s;
+}
+.achievement-row:nth-child(2) {
+  animation-delay: 0.03s;
+}
+.achievement-row:nth-child(3) {
+  animation-delay: 0.06s;
+}
+.achievement-row:nth-child(4) {
+  animation-delay: 0.09s;
+}
+.achievement-row:nth-child(5) {
+  animation-delay: 0.12s;
+}
+.achievement-row:nth-child(6) {
+  animation-delay: 0.15s;
+}
+.achievement-row:nth-child(7) {
+  animation-delay: 0.18s;
+}
+.achievement-row:nth-child(8) {
+  animation-delay: 0.21s;
+}
+.achievement-row:nth-child(9) {
+  animation-delay: 0.24s;
+}
+.achievement-row:nth-child(10) {
+  animation-delay: 0.27s;
+}
+.achievement-row:nth-child(11) {
+  animation-delay: 0.3s;
+}
+.achievement-row:nth-child(12) {
+  animation-delay: 0.33s;
+}
+.achievement-row:nth-child(13) {
+  animation-delay: 0.36s;
+}
+.achievement-row:nth-child(14) {
+  animation-delay: 0.39s;
+}
+.achievement-row:nth-child(15) {
+  animation-delay: 0.42s;
+}
+.achievement-row:nth-child(16) {
+  animation-delay: 0.45s;
+}
+.achievement-row:nth-child(17) {
+  animation-delay: 0.48s;
+}
+.achievement-row:nth-child(18) {
+  animation-delay: 0.51s;
+}
+.achievement-row:nth-child(19) {
+  animation-delay: 0.54s;
+}
+.achievement-row:nth-child(20) {
+  animation-delay: 0.57s;
+}
 
 .achievement-row:last-child {
   border-bottom: none;
@@ -810,7 +880,7 @@
     flex-direction: column;
     width: 100%;
     gap: 0;
-    order: 3;                    /* pushes below brand + hamburger row */
+    order: 3; /* pushes below brand + hamburger row */
     border-top: 1px solid #eee;
     margin-top: 0.25rem;
     padding: 0.25rem 0;
@@ -848,7 +918,7 @@
   .search-bar__input,
   .form-field input {
     min-height: 44px;
-    min-width: 0;                /* allow flex to shrink below 200px default */
+    min-width: 0; /* allow flex to shrink below 200px default */
   }
 
   /* Game header stacks image above body text */

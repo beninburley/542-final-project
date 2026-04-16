@@ -77,6 +77,11 @@ export default function AchievementsPage() {
             isLoading={searchState.status === "loading"}
             label="Search for a game"
           />
+          <p className="search-suggestions">
+            Not sure what to search? Try: <em>Bopl Battle</em>,{" "}
+            <em>Age of Empires II</em>, <em>Terraria</em>, or{" "}
+            <em>Marvel Rivals</em>.
+          </p>
 
           {searchState.status === "idle" && (
             <StatusView
